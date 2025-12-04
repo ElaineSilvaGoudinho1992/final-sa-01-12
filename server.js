@@ -1,11 +1,24 @@
 import express from 'express';
 import cors from 'cors';
+import { conexao } from './model/bd.js';
+import 'dotenv/config';
+import { Pet } from './model/Pets.js';
+
+// dotenv.config();
 
 const app = express();
 const PORT = 3001;
 
 app.use(cors());
 app.use(express.json());
+
+try {
+    await conexao.authenticate()
+    await conexao.sync({ alter: true })
+
+} catch (error) {
+    console.log(erro)
+}
 
 // --- "Banco de Dados" em Memória ---
 const usuarios = [];
@@ -19,7 +32,7 @@ const pets = [
         porte: 'Pequeno',
         descricao: 'Filhote resgatado, dócil e carinhoso. Adora brincar de bolinha.',
         vacinas: true,
-        foto: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=300&q=80' 
+        foto: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=300&q=80'
     },
     {
         id: 2,
@@ -43,7 +56,7 @@ const pets = [
         vacinas: false,
         foto: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=300&q=80'
     },
-{
+    {
         id: 4,
         nome: 'Mingau',
         idade: '2 anos',
@@ -124,10 +137,10 @@ app.post('/api/login', (req, res) => {
         res.json({ success: true, message: 'Login realizado!', user: usuario });
     } else {
         // Backdoor para teste
-        if(email === 'elaine@elaine.com' && senha === 'elaine') {
-             res.json({ success: true, message: 'Login Admin', user: { nome: 'Elaine' } });
+        if (email === 'elaine@elaine.com' && senha === 'elaine') {
+            res.json({ success: true, message: 'Login Admin', user: { nome: 'Elaine' } });
         } else {
-             res.status(401).json({ success: false, message: 'Email ou senha incorretos' });
+            res.status(401).json({ success: false, message: 'Email ou senha incorretos' });
         }
     }
 });
@@ -135,11 +148,11 @@ app.post('/api/login', (req, res) => {
 // 2. Cadastro
 app.post('/api/cadastro', (req, res) => {
     const novoUsuario = req.body;
-    
+
     if (!novoUsuario.email || !novoUsuario.senha) {
         return res.status(400).json({ success: false, message: 'Dados incompletos' });
     }
-    
+
     usuarios.push(novoUsuario);
     console.log('Novo usuário cadastrado:', novoUsuario);
     res.json({ success: true, message: 'Usuário cadastrado com sucesso!' });
